@@ -15,20 +15,16 @@ public class TablaHashDinamica {
 
     // 1. MÉTODO DE INSERCIÓN BÁSICO
     public void insertar(int clave) {
-        // Verificar factor de carga (70%)
         if (size >= capacidad * 0.7) { 
             redimensionar();
         }
-
-        // Calcular posición
+        
         int index = clave % capacidad;
         
-        // Sondeo Lineal: buscar hueco libre
         while (tabla[index] != null) { 
             index = (index + 1) % capacidad;
         }
 
-        // Insertar y aumentar el contador
         tabla[index] = clave;
         size++;
     }
@@ -37,15 +33,12 @@ public class TablaHashDinamica {
     private void redimensionar() {
         System.out.println("Redimensionando la tabla...");
         
-        // Guardamos los datos viejos en una variable temporal
         Integer[] tablaVieja = tabla;
         
-        // Duplicamos la capacidad y creamos la tabla nueva limpia
         capacidad *= 2; 
         tabla = new Integer[capacidad];
-        size = 0; // Reiniciamos a 0 (se volverá a contar al reinsertar)
+        size = 0; )
 
-        // TRUCO 2: Recorrer lo viejo y reutilizar nuestro propio método insertar()
         for (Integer claveAntigua : tablaVieja) {
             if (claveAntigua != null) {
                 insertar(claveAntigua); // ¡Magia! Nos ahorramos volver a escribir el While del sondeo
