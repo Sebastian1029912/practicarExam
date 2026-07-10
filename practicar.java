@@ -1,6 +1,6 @@
 import java.util.*;
 
-// 1. EL NODO (VÉRTICE)
+// 1. EL NODO (VÉRTICE) - Igual de simple
 class Vertex {
     private int id;
     private String nombre;
@@ -12,66 +12,52 @@ class Vertex {
     public String getNombre() { return nombre; }
 }
 
-// 2. LA CONEXIÓN (ARISTA)
+// 2. LA CONEXIÓN (ARISTA) - Igual de simple
 class Edge {
     private Vertex origen;
     private Vertex destino;
-    private int peso; // Agregado para que Dijkstra funcione
+    private int peso; 
 
     public Edge(Vertex origen, Vertex destino, int peso) {
         this.origen = origen;
         this.destino = destino;
         this.peso = peso;
     }
-    public Vertex getOrigen() { return origen; }
     public Vertex getDestino() { return destino; }
-    public int getPeso() { return peso; }
 }
 
-// 3. LA ESTRUCTURA PRINCIPAL Y LOS ALGORITMOS
+// 3. LA ESTRUCTURA PRINCIPAL (Optimizada con Diccionario/Map)
 class Grafo {
-    private List<Vertex> vertices = new ArrayList<>();
-    private List<Edge> aristas = new ArrayList<>();
+    private Map<Vertex, List<Edge>> adyacencias = new HashMap<>();
 
-    public void agregarVertice(Vertex v) { vertices.add(v); }
-    public void agregarArista(Edge e) { aristas.add(e); }
-
-    // -> EL MÉTODO FANTASMA QUE FALTABA EN EL PPT <-
-    // Busca todas las flechas (aristas) que salen de un vértice específico
-    public List<Edge> obtenerAristasDesde(Vertex v) {
-        List<Edge> adyacentes = new ArrayList<>();
-        for (Edge e : aristas) {
-            if (e.getOrigen() == v) {
-                adyacentes.add(e);
-            }
-        }
-        return adyacentes;
+    public void agregarVertice(Vertex v) { 
+        adyacencias.putIfAbsent(v, new ArrayList<>()); 
     }
 
-    // --- ALGORITMO 1: BÚSQUEDA EN PROFUNDIDAD (DFS) ---
-    // Regla para el examen: Usa RECURSIVIDAD.
+    public void agregarArista(Edge e) { 
+        adyacencias.get(e.getOrigen()).add(e); 
+    }
+
+    // --- ALGORITMO 1: DFS (Profundidad) ---
     public void dfs(Vertex inicio) {
-        System.out.println("\n--- Iniciando DFS (Profundidad) ---");
-        Set<Vertex> visitados = new HashSet<>();
-        dfsRecursivo(inicio, visitados);
+        System.out.println("\n--- DFS (Profundidad) ---");
+        dfsRecursivo(inicio, new HashSet<>());
     }
 
     private void dfsRecursivo(Vertex v, Set<Vertex> visitados) {
         if (!visitados.contains(v)) {
             visitados.add(v);
-            System.out.print(v.getNombre() + " -> "); // Imprime el nodo actual
-            
-            // Llama a la recursividad para los vecinos
-            for (Edge e : obtenerAristasDesde(v)) {
+            System.out.print(v.getNombre() + " -> ");
+
+            for (Edge e : adyacencias.get(v)) {
                 dfsRecursivo(e.getDestino(), visitados);
             }
         }
     }
 
-    // --- ALGORITMO 2: BÚSQUEDA EN ANCHURA (BFS) ---
-    // Regla para el examen: Usa un BUCLE WHILE y una COLA (Queue).
+    // --- ALGORITMO 2: BFS (Anchura) ---
     public void bfs(Vertex inicio) {
-        System.out.println("\n\n--- Iniciando BFS (Anchura) ---");
+        System.out.println("\n\n--- BFS (Anchura) ---");
         Set<Vertex> visitados = new HashSet<>();
         Queue<Vertex> cola = new LinkedList<>();
 
@@ -79,25 +65,23 @@ class Grafo {
         visitados.add(inicio);
 
         while (!cola.isEmpty()) {
-            Vertex v = cola.poll(); // Saca el primero de la fila
+            Vertex v = cola.poll(); 
             System.out.print(v.getNombre() + " -> ");
-            
-            for (Edge e : obtenerAristasDesde(v)) {
+
+            for (Edge e : adyacencias.get(v)) {
                 if (!visitados.contains(e.getDestino())) {
                     visitados.add(e.getDestino());
-                    cola.add(e.getDestino()); // Pone a los vecinos en la fila
+                    cola.add(e.getDestino()); 
                 }
             }
         }
     }
 }
 
-// 4. CLASE MAIN PARA PROBAR QUE TODO FUNCIONA
 public class MainGrafos {
     public static void main(String[] args) {
         Grafo miGrafo = new Grafo();
 
-        // Creamos 4 vértices
         Vertex v1 = new Vertex(1, "A");
         Vertex v2 = new Vertex(2, "B");
         Vertex v3 = new Vertex(3, "C");
@@ -108,14 +92,12 @@ public class MainGrafos {
         miGrafo.agregarVertice(v3);
         miGrafo.agregarVertice(v4);
 
-        // Conectamos los vértices (Origen, Destino, Peso)
-        miGrafo.agregarArista(new Edge(v1, v2, 5)); // A apunta a B
-        miGrafo.agregarArista(new Edge(v1, v3, 2)); // A apunta a C
-        miGrafo.agregarArista(new Edge(v2, v4, 1)); // B apunta a D
-        miGrafo.agregarArista(new Edge(v3, v4, 8)); // C apunta a D
+        miGrafo.agregarArista(new Edge(v1, v2, 5)); 
+        miGrafo.agregarArista(new Edge(v1, v3, 2)); 
+        miGrafo.agregarArista(new Edge(v2, v4, 1)); 
+        miGrafo.agregarArista(new Edge(v3, v4, 8)); 
 
-        // Ejecutamos las búsquedas
-        miGrafo.dfs(v1); // A -> B -> D -> C
-        miGrafo.bfs(v1); // A -> B -> C -> D
+        miGrafo.dfs(v1); 
+        miGrafo.bfs(v1); 
     }
 }
