@@ -1,64 +1,69 @@
-import java.util.ArrayList;
+import java.util.Arrays;
 
-public class DynamicHashTableExample {
-    private ArrayList<Integer> hashTable;
-    private int capacity;
+public class TablaHashDinamica {
+    
+    // TRUCO 1: Usar un arreglo nativo (Integer[]) en vez de ArrayList
+    private Integer[] tabla; 
+    private int capacidad;
     private int size;
 
-    public DynamicHashTableExample(int initialCapacity) {
-        capacity = initialCapacity;
-        hashTable = new ArrayList<>(capacity);
-        for (int i = 0; i < capacity; i++) {
-            hashTable.add(null); // Inicializamos la tabla con null
-        }
-        size = 0;
+    public TablaHashDinamica(int capacidadInicial) {
+        this.capacidad = capacidadInicial;
+        this.tabla = new Integer[capacidad]; // Ya nace lleno de 'null' automáticamente
+        this.size = 0;
     }
 
+    // 1. MÉTODO DE INSERCIÓN BÁSICO
     public void insertar(int clave) {
-        if (size >= capacity * 0.7) { // Si el factor de carga es mayor al 70%
+        // Verificar factor de carga (70%)
+        if (size >= capacidad * 0.7) { 
             redimensionar();
         }
-        int index = clave % capacity;
-        while (hashTable.get(index) != null) {
-            index = (index + 1) % capacity; // Sondeo Lineal en caso de colisión
+
+        // Calcular posición
+        int index = clave % capacidad;
+        
+        // Sondeo Lineal: buscar hueco libre
+        while (tabla[index] != null) { 
+            index = (index + 1) % capacidad;
         }
-        hashTable.set(index, clave);
+
+        // Insertar y aumentar el contador
+        tabla[index] = clave;
         size++;
     }
 
+    // 2. EL REDIMENSIONAMIENTO (VERSIÓN INTELIGENTE)
     private void redimensionar() {
         System.out.println("Redimensionando la tabla...");
-        capacity *= 2; // Duplicar la capacidad
-        ArrayList<Integer> newHashTable = new ArrayList<>(capacity);
-        for (int i = 0; i < capacity; i++) {
-            newHashTable.add(null);
-        }
+        
+        // Guardamos los datos viejos en una variable temporal
+        Integer[] tablaVieja = tabla;
+        
+        // Duplicamos la capacidad y creamos la tabla nueva limpia
+        capacidad *= 2; 
+        tabla = new Integer[capacidad];
+        size = 0; // Reiniciamos a 0 (se volverá a contar al reinsertar)
 
-        // Reinsertar los elementos en la nueva tabla
-        for (Integer element : hashTable) {
-            if (element != null) {
-                int index = element % capacity;
-                while (newHashTable.get(index) != null) {
-                    index = (index + 1) % capacity;
-                }
-                newHashTable.set(index, element);
+        // TRUCO 2: Recorrer lo viejo y reutilizar nuestro propio método insertar()
+        for (Integer claveAntigua : tablaVieja) {
+            if (claveAntigua != null) {
+                insertar(claveAntigua); // ¡Magia! Nos ahorramos volver a escribir el While del sondeo
             }
         }
-
-        hashTable = newHashTable; // Reemplazar la tabla vieja por la nueva
     }
 
     public void mostrar() {
-        System.out.println(hashTable);
+        System.out.println(Arrays.toString(tabla));
     }
 
     public static void main(String[] args) {
-        DynamicHashTableExample hashTable = new DynamicHashTableExample(4);
-        hashTable.insertar(5);
-        hashTable.insertar(10);
-        hashTable.insertar(15);
-        hashTable.insertar(20);
-        hashTable.insertar(25); // Esto causará un redimensionamiento
-        hashTable.mostrar(); // Ver la tabla después del redimensionamiento
+        TablaHashDinamica tablaDinamica = new TablaHashDinamica(4);
+        tablaDinamica.insertar(5);
+        tablaDinamica.insertar(10);
+        tablaDinamica.insertar(15);
+        tablaDinamica.insertar(20);
+        tablaDinamica.insertar(25); // Aquí explotará la redimensión
+        tablaDinamica.mostrar();
     }
 }
